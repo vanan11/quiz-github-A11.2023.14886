@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminPoliController;
 use App\Http\Controllers\Admin\DokterController;
 use App\Http\Controllers\Admin\PasienController;
-
+use App\Http\Controllers\Admin\ObatController;
+use App\Http\Controllers\Dokter\JadwalPeriksaController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -63,4 +64,23 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::resource('polis', AdminPoliController::class);
     Route::resource('dokter', DokterController::class);
     Route::resource('pasien', PasienController::class);
+});
+
+# Route digunakan untuk menghubungkan URL dengan method pada controller. Untuk fitur CRUD data obat, kita dapat menggunakan resource route sehingga Laravel akan secara otomatis membuat seluruh route yang dibutuhkan.
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+    Route::resource('polis', AdminPoliController::class);
+    Route::resource('dokter', DokterController::class);
+    Route::resource('pasien', PasienController::class);
+    Route::resource('obat', ObatController::class);
+});
+
+Route::middleware(['auth', 'role:dokter'])->prefix('dokter')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dokter.dashboard');
+    })->name('dokter.dashboard');
+
+    Route::resource('jadwal-periksa', JadwalPeriksaController::class);
 });
