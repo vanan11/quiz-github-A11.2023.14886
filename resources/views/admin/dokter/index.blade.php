@@ -1,16 +1,42 @@
+
 <x-layouts.app title="Data Dokter">
 
     {{-- Header --}}
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+
         <h2 class="text-2xl font-bold text-slate-800">
             Data Dokter
         </h2>
 
-        <a href="{{ route('dokter.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 
-                  text-white rounded-xl text-sm font-semibold transition">
-            <i class="fas fa-plus text-sm"></i>
-            Tambah Dokter
-        </a>
+        {{-- Tombol Aksi Header --}}
+        <div class="flex flex-wrap items-center gap-3">
+
+            {{-- Export Excel --}}
+            <a href="{{ route('admin.dokter.export') }}"
+                class="inline-flex items-center gap-2 px-5 py-2.5
+                       bg-emerald-600 hover:bg-emerald-700
+                       text-white rounded-xl text-sm
+                       font-semibold transition shadow-sm">
+
+                <i class="fas fa-file-excel text-sm"></i>
+                Export Excel
+
+            </a>
+
+            {{-- Tambah Dokter --}}
+            <a href="{{ route('dokter.create') }}"
+                class="inline-flex items-center gap-2 px-5 py-2.5
+                       bg-primary hover:bg-primary/90
+                       text-white rounded-xl text-sm
+                       font-semibold transition">
+
+                <i class="fas fa-plus text-sm"></i>
+                Tambah Dokter
+
+            </a>
+
+        </div>
+
     </div>
 
     {{-- Card Table --}}
@@ -37,70 +63,96 @@
                     <tbody class="text-sm text-slate-700">
 
                         @forelse($dokters as $dokter)
+
                         <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
 
+                            {{-- Nama Dokter --}}
                             <td class="px-6 py-4 font-semibold text-slate-800">
                                 {{ $dokter->nama }}
                             </td>
 
+                            {{-- Email --}}
                             <td class="px-6 py-4">
                                 {{ $dokter->email }}
                             </td>
 
+                            {{-- No KTP --}}
                             <td class="px-6 py-4">
                                 {{ $dokter->no_ktp ?? '-' }}
                             </td>
 
+                            {{-- No HP --}}
                             <td class="px-6 py-4">
                                 {{ $dokter->no_hp ?? '-' }}
                             </td>
 
+                            {{-- Alamat --}}
                             <td class="px-6 py-4">
                                 {{ $dokter->alamat ?? '-' }}
                             </td>
 
+                            {{-- Poli --}}
                             <td class="px-6 py-4">
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
                                     {{ $dokter->poli->nama_poli ?? 'Belum Dipilih' }}
                                 </span>
                             </td>
 
+                            {{-- Aksi --}}
                             <td class="px-6 py-4 text-right">
+
                                 <div class="inline-flex items-center gap-2">
 
                                     {{-- Edit --}}
-                                    <a href="{{ route('dokter.edit', $dokter->id) }}" class="inline-flex items-center gap-1 px-3 py-2 
-                                        bg-amber-500 hover:bg-amber-600 
-                                        text-white rounded-lg text-xs font-semibold transition">
+                                    <a href="{{ route('dokter.edit', $dokter->id) }}"
+                                        class="inline-flex items-center gap-1 px-3 py-2
+                                               bg-amber-500 hover:bg-amber-600
+                                               text-white rounded-lg text-xs
+                                               font-semibold transition">
+
                                         <i class="fas fa-pen-to-square text-xs"></i>
                                         Edit
+
                                     </a>
 
                                     {{-- Delete --}}
-                                    <form action="{{ route('dokter.destroy', $dokter->id) }}" method="POST">
+                                    <form action="{{ route('dokter.destroy', $dokter->id) }}"
+                                        method="POST">
+
                                         @csrf
                                         @method('DELETE')
 
                                         <button type="submit"
-                                            onclick="return confirm('Yakin ingin menghapus dokter ini?')" class="inline-flex items-center gap-1 px-3 py-2 
-                                             bg-red-500 hover:bg-red-600 
-                                             text-white rounded-lg text-xs font-semibold transition">
+                                            onclick="return confirm('Yakin ingin menghapus dokter ini?')"
+                                            class="inline-flex items-center gap-1 px-3 py-2
+                                                   bg-red-500 hover:bg-red-600
+                                                   text-white rounded-lg text-xs
+                                                   font-semibold transition">
+
                                             <i class="fas fa-trash text-xs"></i>
                                             Hapus
+
                                         </button>
+
                                     </form>
 
                                 </div>
+
                             </td>
 
                         </tr>
+
                         @empty
+
                         <tr>
                             <td colspan="7" class="text-center py-16 text-slate-400">
+
                                 <i class="fas fa-inbox text-3xl mb-3 block"></i>
                                 Belum ada data dokter
+
                             </td>
                         </tr>
+
                         @endforelse
 
                     </tbody>

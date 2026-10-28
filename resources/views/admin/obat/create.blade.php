@@ -1,98 +1,240 @@
 <x-layouts.app title="Tambah Obat">
 
-    {{-- Header --}}
+    {{-- ====================================== --}}
+    {{-- HEADER --}}
+    {{-- ====================================== --}}
+
     <div class="flex items-center gap-3 mb-6">
-        <a href="{{ route('obat.index') }}" class="flex items-center justify-center w-9 h-9 
-                  rounded-lg bg-slate-100 hover:bg-slate-200 
-                  text-slate-600 transition">
+
+        <a href="{{ route('obat.index') }}"
+            class="flex items-center justify-center w-9 h-9
+                   rounded-lg bg-slate-100 hover:bg-slate-200
+                   text-slate-600 transition">
+
             <i class="fas fa-arrow-left text-sm"></i>
+
         </a>
 
         <h2 class="text-2xl font-bold text-slate-800">
             Tambah Obat
         </h2>
+
     </div>
 
-    {{-- Card --}}
+    {{-- ====================================== --}}
+    {{-- CARD FORM --}}
+    {{-- ====================================== --}}
+
     <div class="card bg-base-100 shadow-md rounded-2xl border border-slate-200">
+
         <div class="card-body p-8">
 
             <form action="{{ route('obat.store') }}" method="POST">
+
                 @csrf
 
-                {{-- Grid --}}
+                {{-- ================================== --}}
+                {{-- NAMA OBAT DAN KEMASAN --}}
+                {{-- ================================== --}}
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 
                     {{-- Nama Obat --}}
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">
-                            Nama Obat <span class="text-red-500">*</span>
+
+                        <label for="nama_obat"
+                            class="block text-sm font-semibold text-slate-700 mb-1">
+
+                            Nama Obat
+                            <span class="text-red-500">*</span>
+
                         </label>
-                        <input type="text" name="nama_obat" value="{{ old('nama_obat') }}"
-                            placeholder="Masukkan nama obat..." class="w-full px-4 py-2 border-2 rounded-lg p-2
-                                      focus:border-primary focus:outline-none
-                                      @error('nama_obat') border-red-500 @enderror" required>
+
+                        <input
+                            type="text"
+                            id="nama_obat"
+                            name="nama_obat"
+                            value="{{ old('nama_obat') }}"
+                            placeholder="Masukkan nama obat..."
+                            maxlength="255"
+                            class="w-full px-4 py-2 border-2 rounded-lg
+                                   focus:border-primary focus:outline-none
+                                   @error('nama_obat') border-red-500 @enderror"
+                            required>
+
                         @error('nama_obat')
-                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            <p class="text-xs text-red-500 mt-1">
+                                {{ $message }}
+                            </p>
                         @enderror
+
                     </div>
 
                     {{-- Kemasan --}}
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">
+
+                        <label for="kemasan"
+                            class="block text-sm font-semibold text-slate-700 mb-1">
+
                             Kemasan
+                            <span class="text-red-500">*</span>
+
                         </label>
-                        <input type="text" name="kemasan" value="{{ old('kemasan') }}"
-                            placeholder="Contoh: Strip, Botol, Tube..." class="w-full px-4 py-2 border-2 rounded-lg p-2
-                                      focus:border-primary focus:outline-none
-                                      @error('kemasan') border-red-500 @enderror">
+
+                        <input
+                            type="text"
+                            id="kemasan"
+                            name="kemasan"
+                            value="{{ old('kemasan') }}"
+                            placeholder="Contoh: Strip, Botol, Tube..."
+                            maxlength="35"
+                            class="w-full px-4 py-2 border-2 rounded-lg
+                                   focus:border-primary focus:outline-none
+                                   @error('kemasan') border-red-500 @enderror"
+                            required>
+
                         @error('kemasan')
-                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            <p class="text-xs text-red-500 mt-1">
+                                {{ $message }}
+                            </p>
                         @enderror
+
                     </div>
 
                 </div>
 
-                {{-- Harga --}}
-                <div class="mb-8">
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">
-                        Harga <span class="text-red-500">*</span>
-                    </label>
+                {{-- ================================== --}}
+                {{-- HARGA DAN STOK OBAT --}}
+                {{-- ================================== --}}
 
-                    <div class="flex items-center border-2 rounded-lg p-2 px-4 py-2
-                                focus-within:border-primary">
-                        <span class="text-slate-500 text-sm font-semibold mr-2">
-                            Rp
-                        </span>
-                        <input type="number" name="harga" value="{{ old('harga') }}" placeholder="0" min="0" step="1"
-                            class="w-full focus:outline-none
-                                      @error('harga') border-red-500 @enderror" required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+
+                    {{-- Harga Obat --}}
+                    <div>
+
+                        <label for="harga"
+                            class="block text-sm font-semibold text-slate-700 mb-1">
+
+                            Harga Obat
+                            <span class="text-red-500">*</span>
+
+                        </label>
+
+                        <div class="flex items-center border-2 rounded-lg
+                                    px-4 py-2 focus-within:border-primary
+                                    @error('harga') border-red-500 @enderror">
+
+                            <span class="text-slate-500 text-sm font-semibold mr-2">
+                                Rp
+                            </span>
+
+                            <input
+                                type="number"
+                                id="harga"
+                                name="harga"
+                                value="{{ old('harga') }}"
+                                placeholder="0"
+                                min="0"
+                                max="2147483647"
+                                step="1"
+                                class="w-full focus:outline-none bg-transparent"
+                                required>
+
+                        </div>
+
+                        @error('harga')
+                            <p class="text-xs text-red-500 mt-1">
+                                {{ $message }}
+                            </p>
+                        @enderror
+
+                        <p class="text-xs text-slate-400 mt-1">
+                            Masukkan harga dalam Rupiah.
+                        </p>
+
                     </div>
 
-                    @error('harga')
-                    <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                    @enderror
+                    {{-- Stok Obat --}}
+                    <div>
+
+                        <label for="stok"
+                            class="block text-sm font-semibold text-slate-700 mb-1">
+
+                            Stok Obat
+                            <span class="text-red-500">*</span>
+
+                        </label>
+
+                        <div class="flex items-center border-2 rounded-lg
+                                    px-4 py-2 focus-within:border-primary
+                                    @error('stok') border-red-500 @enderror">
+
+                            <input
+                                type="number"
+                                id="stok"
+                                name="stok"
+                                value="{{ old('stok', 0) }}"
+                                placeholder="0"
+                                min="0"
+                                max="4294967295"
+                                step="1"
+                                class="w-full focus:outline-none bg-transparent"
+                                required>
+
+                            <span class="text-slate-400 text-xs font-medium ml-2">
+                                Unit
+                            </span>
+
+                        </div>
+
+                        @error('stok')
+                            <p class="text-xs text-red-500 mt-1">
+                                {{ $message }}
+                            </p>
+                        @enderror
+
+                        <p class="text-xs text-slate-400 mt-1">
+                            Jumlah persediaan obat yang tersedia.
+                        </p>
+
+                    </div>
+
                 </div>
 
-                {{-- Buttons --}}
-                <div class="flex gap-3">
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary 
-                               hover:bg-primary/90 text-white 
+                {{-- ================================== --}}
+                {{-- BUTTONS --}}
+                {{-- ================================== --}}
+
+                <div class="flex flex-wrap gap-3">
+
+                    {{-- Simpan --}}
+                    <button
+                        type="submit"
+                        class="px-6 py-2.5 rounded-xl bg-primary
+                               hover:bg-primary/90 text-white
                                font-semibold text-sm transition">
+
                         <i class="fas fa-save mr-1"></i>
                         Simpan
+
                     </button>
 
-                    <a href="{{ route('obat.index') }}" class="px-6 py-2.5 rounded-xl bg-slate-100 
-                              hover:bg-slate-200 text-slate-600 
-                              font-semibold text-sm transition">
+                    {{-- Batal --}}
+                    <a href="{{ route('obat.index') }}"
+                        class="px-6 py-2.5 rounded-xl bg-slate-100
+                               hover:bg-slate-200 text-slate-600
+                               font-semibold text-sm transition">
+
                         Batal
+
                     </a>
+
                 </div>
 
             </form>
 
         </div>
+
     </div>
 
 </x-layouts.app>

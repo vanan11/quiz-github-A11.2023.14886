@@ -6,77 +6,360 @@ use App\Http\Controllers\Controller;
 use App\Models\JadwalPeriksa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class JadwalPeriksaController extends Controller
 {
+    // ============================================
+    // MENAMPILKAN JADWAL PERIKSA
+    // ============================================
 
-# Function index() digunakan untuk menampilkan daftar jadwal periksa dokter yang tersimpan di database.
-    public function index(){
-        $dokter = Auth::user(); # Mengambil data user yang sedang login dari sistem autentikasi Laravel, kemudian menyimpannya ke dalam variabel $dokter.
-        $jadwalPeriksas = JadwalPeriksa::where('id_dokter', $dokter->id)->orderBy('hari')->get(); # Mengambil data jadwal periksa yang dimiliki oleh dokter yang sedang login, kemudian menyimpannya ke dalam variabel $jadwals.
-        return view('dokter.jadwal-periksa.index', compact('jadwalPeriksas')); # Menampilkan halaman index yang berada pada folder jadwal-periksa di dalam folder dokter, kemudian mengirimkan data $jadwals ke view agar dapat ditampilkan pada tabel daftar jadwal periksa
+    public function index()
+    {
+        $dokter = Auth::user();
+
+        $jadwalPeriksas = JadwalPeriksa::where(
+            'id_dokter',
+            $dokter->id
+        )
+            ->orderBy('hari')
+            ->get();
+
+        return view(
+            'dokter.jadwal-periksa.index',
+            compact('jadwalPeriksas')
+        );
     }
 
-# Function create() digunakan untuk mengembalikan ke tampilan form input jadwal periksa baru.
-    public function create(){
-        return view('dokter.jadwal-periksa.create'); # Menampilkan halaman create yang berada pada folder jadwal-periksa di dalam folder dokter.
+    // ============================================
+    // FORM TAMBAH JADWAL
+    // ============================================
+
+    public function create()
+    {
+        return view('dokter.jadwal-periksa.create');
     }
 
-# Function store() digunakan untuk menyimpan data jadwal periksa baru yang dikirim dari form input. Pada proses ini sistem akan melakukan beberapa langkah.
-    public function store(Request $request){
+    // ============================================
+    // SIMPAN JADWAL
+    // ============================================
+
+    public function store(Request $request)
+    {
         $request->validate([
             'hari' => 'required',
             'jam_mulai' => 'required',
-            'jam_selesai' => 'required'
-        ]); # Melakukan validasi data dari form input seperti hari, jam mulai, dan jam selesai.
-            # Melakukan validasi data yang dikirim dari form input. # Field hari, jam_mulai, dan jam_selesai harus diisi sebelum data disimpan ke database. Jika salah satu field tidak diisi, sistem akan menampilkan pesan error.      
-            
-            JadwalPeriksa::create([
+            'jam_selesai' => 'required',
+        ]);
+
+        JadwalPeriksa::create([
             'id_dokter' => Auth::id(),
             'hari' => $request->hari,
             'jam_mulai' => $request->jam_mulai,
-            'jam_selesai' => $request->jam_selesai
-        ]); # Menyimpan data jadwal periksa ke dalam tabel jadwal_periksas di database. # Menyimpan data jadwal periksa baru ke dalam tabel jadwal_periksas. Data dokter diambil dari user yang sedang login, sedangkan data hari dan jam diambil dari input form.
+            'jam_selesai' => $request->jam_selesai,
+        ]);
 
-        return redirect()->route('jadwal-periksa.index')
+        return redirect()
+            ->route('jadwal-periksa.index')
             ->with('message', 'Data Berhasil di Simpan')
-            ->with('type', 'success'); # Mengarahkan pengguna kembali ke halaman daftar jadwal periksa setelah data berhasil disimpan.
-    }
-# Setelah data berhasil disimpan, sistem akan mengarahkan pengguna kembali ke halaman daftar jadwal periksa dengan pesan bahwa data berhasil ditambahkan.
-
-# Function edit() digunakan untuk menampilkan form edit jadwal periksa.
-    public function edit($id){
-        $jadwalPeriksa = JadwalPeriksa::findOrFail($id); # Mencari data jadwal periksa berdasarkan ID, kemudian menyimpannya ke dalam variabel $jadwal.
-        return view('dokter.jadwal-periksa.edit', compact('jadwalPeriksa')); #  Menampilkan halaman edit dan mengirimkan data jadwal periksa ke view agar dapat ditampilkan pada form edit.
+            ->with('type', 'success');
     }
 
-    # Function update() digunakan untuk memperbarui data jadwal periksa yang sudah ada di database berdasarkan ID jadwal yang dipilih.
-    public function update(Request $request, string $id){
+    // ============================================
+    // FORM EDIT JADWAL
+    // ============================================
+
+    public function edit($id)
+    {
+        $jadwalPeriksa = JadwalPeriksa::where(
+            'id_dokter',
+            Auth::id()
+        )->findOrFail($id);
+
+        return view(
+            'dokter.jadwal-periksa.edit',
+            compact('jadwalPeriksa')
+        );
+    }
+
+    // ============================================
+    // UPDATE JADWAL
+    // ============================================
+
+    public function update(Request $request, string $id)
+    {
         $request->validate([
             'hari' => 'required',
             'jam_mulai' => 'required',
-            'jam_selesai' => 'required'
-        ]); # Melakukan validasi data yang dikirim dari form edit. Field hari, jam_mulai, dan jam_selesai harus diisi sebelum data dapat diperbarui di database.
+            'jam_selesai' => 'required',
+        ]);
 
-        $jadwalPeriksa = JadwalPeriksa::findOrFail($id); # Mencari data jadwal periksa berdasarkan ID. Method findOrFail() mengambil data jadwal yang sesuai dengan ID yang diberikan. Jika data tidak ditemukan, maka Laravel akan menampilkan halaman error.
+        $jadwalPeriksa = JadwalPeriksa::where(
+            'id_dokter',
+            Auth::id()
+        )->findOrFail($id);
+
         $jadwalPeriksa->update([
             'hari' => $request->hari,
             'jam_mulai' => $request->jam_mulai,
-            'jam_selesai' => $request->jam_selesai
-        ]); # Memperbarui data jadwal periksa yang telah ditemukan sebelumnya. Data yang diperbarui meliputi hari, jam mulai, dan jam selesai yang diambil dari input form edit.
+            'jam_selesai' => $request->jam_selesai,
+        ]);
 
-        return redirect()->route('jadwal-periksa.index')
+        return redirect()
+            ->route('jadwal-periksa.index')
             ->with('message', 'Berhasil Melakukan Update Data')
             ->with('type', 'success');
     }
 
-# Function destroy() digunakan untuk menghapus data jadwal periksa dari database.
-    public function destroy(string $id){
-        $jadwalPeriksa = JadwalPeriksa::findOrFail($id);
-        $jadwalPeriksa->delete(); # Mencari data jadwal periksa berdasarkan ID, kemudian menghapus data tersebut dari tabel jadwal_periksas.
+    // ============================================
+    // HAPUS JADWAL
+    // ============================================
 
-        return redirect()->route('jadwal-periksa.index')
+    public function destroy(string $id)
+    {
+        $jadwalPeriksa = JadwalPeriksa::where(
+            'id_dokter',
+            Auth::id()
+        )->findOrFail($id);
+
+        $jadwalPeriksa->delete();
+
+        return redirect()
+            ->route('jadwal-periksa.index')
             ->with('message', 'Berhasil Melakukan Hapus Data')
-            ->with('type', 'success'); # Setelah proses penghapusan berhasil dilakukan, sistem akan mengarahkan pengguna kembali ke halaman daftar jadwal periksa dengan pesan bahwa data berhasil dihapus.
+            ->with('type', 'success');
+    }
+
+    // ============================================
+    // EXPORT EXCEL JADWAL PERIKSA
+    // ============================================
+
+    public function exportExcel()
+    {
+        // Hanya mengambil jadwal milik
+        // dokter yang sedang login.
+
+        $dokter = Auth::user();
+
+        $jadwalPeriksas = JadwalPeriksa::where(
+            'id_dokter',
+            $dokter->id
+        )
+            ->orderBy('hari')
+            ->orderBy('jam_mulai')
+            ->get();
+
+        // Membuat spreadsheet
+        $spreadsheet = new Spreadsheet();
+
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setTitle('Jadwal Periksa');
+
+        // ========================================
+        // HEADER EXCEL
+        // ========================================
+
+        $headers = [
+            'No',
+            'Nama Dokter',
+            'Hari',
+            'Jam Mulai',
+            'Jam Selesai',
+        ];
+
+        foreach ($headers as $index => $header) {
+            $sheet->setCellValue(
+                [$index + 1, 1],
+                $header
+            );
+        }
+
+        // ========================================
+        // ISI DATA EXCEL
+        // ========================================
+
+        $row = 2;
+
+        foreach ($jadwalPeriksas as $index => $jadwal) {
+
+            $sheet->setCellValue(
+                'A' . $row,
+                $index + 1
+            );
+
+            $data = [
+                'B' => $dokter->nama,
+                'C' => $jadwal->hari,
+                'D' => $this->formatJam(
+                    $jadwal->jam_mulai
+                ),
+                'E' => $this->formatJam(
+                    $jadwal->jam_selesai
+                ),
+            ];
+
+            foreach ($data as $column => $value) {
+
+                $sheet->setCellValueExplicit(
+                    $column . $row,
+                    (string) ($value ?? '-'),
+                    DataType::TYPE_STRING
+                );
+            }
+
+            $row++;
+        }
+
+        // ========================================
+        // FORMAT TABEL EXCEL
+        // ========================================
+
+        $lastRow = max(1, $row - 1);
+
+        // Header tebal
+        $sheet->getStyle('A1:E1')
+            ->getFont()
+            ->setBold(true);
+
+        // Warna hijau muda
+        $sheet->getStyle('A1:E1')
+            ->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setARGB('FFD1FAE5');
+
+        // Lebar kolom
+        $widths = [
+            'A' => 8,
+            'B' => 30,
+            'C' => 20,
+            'D' => 20,
+            'E' => 20,
+        ];
+
+        foreach ($widths as $column => $width) {
+            $sheet->getColumnDimension($column)
+                ->setWidth($width);
+        }
+
+        // Border tabel
+        $sheet->getStyle('A1:E' . $lastRow)
+            ->getBorders()
+            ->getAllBorders()
+            ->setBorderStyle(Border::BORDER_THIN);
+
+        // Filter Excel
+        $sheet->setAutoFilter(
+            'A1:E' . $lastRow
+        );
+
+        // Header tetap terlihat
+        $sheet->freezePane('A2');
+
+        // ========================================
+        // BUAT FILE EXCEL
+        // ========================================
+
+        $fileName = 'jadwal-periksa-'
+            . now()->format('Y-m-d-His')
+            . '.xlsx';
+
+        $tempFile = tempnam(
+            sys_get_temp_dir(),
+            'jadwal_excel_'
+        );
+
+        if ($tempFile === false) {
+            abort(500, 'Gagal membuat file sementara.');
+        }
+
+        try {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save($tempFile);
+        } catch (\Throwable $e) {
+            @unlink($tempFile);
+            throw $e;
+        } finally {
+            $spreadsheet->disconnectWorksheets();
+        }
+
+        // ========================================
+        // BERSIHKAN OUTPUT BUFFER
+        // ========================================
+
+        // Menggunakan metode yang sebelumnya
+        // berhasil untuk ekspor Excel.
+
+        while (ob_get_level() > 0) {
+
+            $status = ob_get_status();
+
+            $flags = $status['flags'] ?? 0;
+
+            if (
+                ($flags & PHP_OUTPUT_HANDLER_REMOVABLE) !== 0
+            ) {
+                ob_end_clean();
+                continue;
+            }
+
+            if (
+                ($flags & PHP_OUTPUT_HANDLER_CLEANABLE) !== 0
+            ) {
+                ob_clean();
+            }
+
+            break;
+        }
+
+        // Memastikan header HTTP belum dikirim
+        if (headers_sent($source, $line)) {
+
+            @unlink($tempFile);
+
+            throw new \RuntimeException(
+                'Output sudah dikirim dari '
+                . $source . ':' . $line
+            );
+        }
+
+        // ========================================
+        // DOWNLOAD EXCEL
+        // ========================================
+
+        return response()->download(
+            $tempFile,
+            $fileName,
+            [
+                'Content-Type' =>
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+
+                'Cache-Control' =>
+                    'no-store, no-cache, must-revalidate',
+            ]
+        )->deleteFileAfterSend(true);
+    }
+
+    // ============================================
+    // FORMAT JAM
+    // ============================================
+
+    private function formatJam($jam)
+    {
+        if (empty($jam)) {
+            return '-';
+        }
+
+        if ($jam instanceof \DateTimeInterface) {
+            return $jam->format('H:i');
+        }
+
+        // Mengubah 08:00:00 menjadi 08:00
+        return substr((string) $jam, 0, 5);
     }
 }

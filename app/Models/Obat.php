@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Obat extends Model
 {
@@ -12,9 +13,18 @@ class Obat extends Model
         'nama_obat',
         'kemasan',
         'harga',
+        'stok',
     ];
 
-    public function detailPeriksas()
+    protected function casts(): array
+    {
+        return [
+            'harga' => 'integer',
+            'stok' => 'integer',
+        ];
+    }
+
+    public function detailPeriksas(): HasMany
     {
         return $this->hasMany(DetailPeriksa::class, 'id_obat');
     }
